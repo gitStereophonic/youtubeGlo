@@ -175,8 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // модальное окно
-  {
+  const youtuber = () => {
     const youtuberItems = document.querySelectorAll('[data-youtuber]');
     const youtuberModal = document.querySelector('.youTuberModal');
     const youtuberContainer = document.getElementById('youtuberContainer');
@@ -185,8 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const qh = [2160, 1440, 1080, 720, 480, 360, 240, 144];
 
     const sizeVideo = () => {
-      let ww = document.documentElement.clientWidth;
-      let wh = document.documentElement.clientHeight;
+      const ww = document.documentElement.clientWidth;
+      const wh = document.documentElement.clientHeight;
       for (let i = 0; i < qw.length; ++i) {
         if (ww > qw[i]) {
           youtuberContainer.querySelector('iframe').style.cssText = `
@@ -224,12 +223,135 @@ document.addEventListener('DOMContentLoaded', () => {
       youtuberContainer.textContent = '';
       window.removeEventListener('resize', sizeVideo);
     });
+  };
+
+  // модальное окно
+  {
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
+      <div class="youTuberModal">
+        <div id="youtuberClose">&#215;</div>
+        <div id="youtuberContainer"></div>
+      </div>
+      `
+    );
+    youtuber();
   }
 
-  // youtube
+  // API
   {
     const API_KEY = 'AIzaSyAiox8El-TwxRJ1gmrGVklUij-2v9xdMlo';
     const CLIENT_ID = '1013588345540-j6qbve8qk8nglh715lfavkrir8hja122.apps.googleusercontent.com';
     const CLIENT_SECRET = 'Mt2rUQkK9sGgY5Fgw_Vsrhei';
+
+    // Authorize
+    {
+      const buttonAuth = document.getElementById('authorize');
+      const authBlock = document.querySelector('.auth');
+      const errorAuth = err => {
+        console.error(err);
+        authBlock.style.display = '';
+      };
+
+      gapi.load('client:auth2', () => gapi.auth2.init({ client_id: CLIENT_ID }));
+
+      const authenticate = () =>
+        gapi.auth2
+          .getAuthInstance()
+          .signIn({ scope: 'https://www.googleapis.com/auth/youtube.readonly' })
+          .then(() => console.log('Авторизация успешна'))
+          .catch(errorAuth);
+
+      const loadClient = () => {
+        gapi.client.setApiKey(API_KEY);
+        return gapi.client
+          .load('https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest')
+          .then(() => console.log('GAPI client loaded for API'))
+          .then(() => (authBlock.style.display = 'none'))
+          .catch(errorAuth);
+      };
+
+      buttonAuth.addEventListener('click', () => {
+        authenticate().then(loadClient);
+      });
+    }
+  }
+
+  // Request
+  {
+    const gloTube = document.querySelector('.logo-academy');
+    const trends = document.getElementById('yt_trend');
+    const like = document.getElementById('yt_like');
+
+    const request = options =>
+      gapi.client.youtube[options.method]
+        .list(options)
+        .then(responce => responce.result.items)
+        .then(render)
+        .then(youtuber)
+        .catch(err => console.error('Во время запроса произошла ошибка: ' + err));
+
+    const render = data => {
+      const ytWrapper = document.getElementById('yt-wrapper');
+      ytWrapper.textContent = '';
+      data.forEach(item => {
+        try {
+          const {
+            id,
+            id: { videoId },
+            snippet: {
+              channelTitle,
+              title,
+              thumbnails: {
+                high: { url }
+              },
+              resourceId: { videoId: likedVideoId } = {}
+            }
+          } = item;
+
+          ytWrapper.innerHTML += `
+            <div class="yt" data-youtuber="${likedVideoId || videoId || id}">
+              <div class="yt-thumbnail" style="--aspect-ratio:16/9;">
+                <img src="${url}" alt="thumbnail" class="yt-thumbnail__img">
+              </div>
+              <div class="yt-title">${title}</div>
+              <div class="yt-channel">${channelTitle}</div>
+            </div>
+          `;
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    };
+
+    gloTube.addEventListener('click', () => {
+      request({
+        method: 'search',
+        part: 'snippet',
+        channelId: 'UCVswRUcKC-M35RzgPRv8qUg',
+        order: 'date',
+        maxResults: 6
+      });
+    });
+
+    trends.addEventListener('click', () => {
+      request({
+        method: 'videos',
+        part: 'snippet',
+        chart: 'mostPopular',
+        maxResults: 6,
+        region: 'RU'
+      });
+    });
+
+    like.addEventListener('click', () => {
+      request({
+        method: 'playlistItems',
+        part: 'snippet',
+        playlistId: 'LLb9Y6ExpE4ptu5mJBvmLoJA',
+        maxResults: 6
+      });
+    });
   }
 });
