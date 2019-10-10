@@ -11,18 +11,135 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleKeyboard = () => {
       keyboard.style.top = keyboard.style.top ? '' : '50%';
     };
+
+    const changeLanguage = (btn, lang) => {
+      const Langs = {
+        langRu: [
+          'ё',
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          '-',
+          '=',
+          '⬅',
+          'й',
+          'ц',
+          'у',
+          'к',
+          'е',
+          'н',
+          'г',
+          'ш',
+          'щ',
+          'з',
+          'х',
+          'ъ',
+          'ф',
+          'ы',
+          'в',
+          'а',
+          'п',
+          'р',
+          'о',
+          'л',
+          'д',
+          'ж',
+          'э',
+          'я',
+          'ч',
+          'с',
+          'м',
+          'и',
+          'т',
+          'ь',
+          'б',
+          'ю',
+          '.',
+          'en',
+          ' '
+        ],
+        langEn: [
+          '`',
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          0,
+          '-',
+          '=',
+          '⬅',
+          'q',
+          'w',
+          'e',
+          'r',
+          't',
+          'y',
+          'u',
+          'i',
+          'o',
+          'p',
+          '[',
+          ']',
+          'a',
+          's',
+          'd',
+          'f',
+          'g',
+          'h',
+          'j',
+          'k',
+          'l',
+          ';',
+          '"',
+          'z',
+          'x',
+          'c',
+          'v',
+          'b',
+          'n',
+          'm',
+          ',',
+          '.',
+          '/',
+          'ru',
+          ' '
+        ]
+      };
+
+      if (lang === 'en') {
+        btn.forEach((elem, i) => {
+          elem.textContent = Langs.langEn[i];
+        });
+      } else {
+        btn.forEach((elem, i) => {
+          elem.textContent = Langs.langRu[i];
+        });
+      }
+    };
+
     const typing = event => {
       const { target } = event;
-      if (target.id == 'keyboard-backspace') {
-        searchInput.value = searchInput.value.substring(
-          0,
-          searchInput.value.length - 1
-        );
-      } else {
-        if (target.tagName === 'BUTTON') {
-          searchInput.value += target.textContent
-            ? target.textContent.trim()
-            : ' ';
+      if (target.tagName === 'BUTTON') {
+        const buttons = [...keyboard.querySelectorAll('button')].filter(b => b.style.visibility !== 'hidden');
+        const contentButton = target.textContent.trim();
+        if (target.id === 'keyboard-backspace') {
+          searchInput.value = searchInput.value.slice(0, length - 1);
+        } else if (contentButton === 'en' || contentButton === 'ru') {
+          changeLanguage(buttons, contentButton);
+        } else {
+          searchInput.value += contentButton ? contentButton : ' ';
         }
       }
     };
@@ -60,6 +177,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // модальное окно
   {
-    const divYoutuber = document.createElement('div');
+    const youtuberItems = document.querySelectorAll('[data-youtuber]');
+    const youtuberModal = document.querySelector('.youTuberModal');
+    const youtuberContainer = document.getElementById('youtuberContainer');
+
+    const qw = [3840, 2560, 1920, 1280, 854, 640, 426, 256];
+    const qh = [2160, 1440, 1080, 720, 480, 360, 240, 144];
+
+    const sizeVideo = () => {
+      let ww = document.documentElement.clientWidth;
+      let wh = document.documentElement.clientHeight;
+      for (let i = 0; i < qw.length; ++i) {
+        if (ww > qw[i]) {
+          youtuberContainer.querySelector('iframe').style.cssText = `
+            width: ${qw[i]}px;
+            height: ${qh[i]}px;
+          `;
+          youtuberContainer.style.cssText = `
+            width: ${qw[i]}px;
+            height: ${qh[i]}px;
+            top: ${(wh - qh[i]) / 2}px;
+            left: ${(ww - qw[i]) / 2}px;
+          `;
+          break;
+        }
+      }
+    };
+
+    youtuberItems.forEach(elem => {
+      elem.addEventListener('click', () => {
+        const idVideo = elem.dataset.youtuber;
+        youtuberModal.style.display = 'block';
+
+        const youtuberFrame = document.createElement('iframe');
+        youtuberFrame.src = `https://youtube.com/embed/${idVideo}`;
+        youtuberContainer.insertAdjacentElement('beforeend', youtuberFrame);
+
+        window.addEventListener('resize', sizeVideo);
+
+        sizeVideo();
+      });
+    });
+
+    youtuberModal.addEventListener('click', () => {
+      youtuberModal.style.display = '';
+      youtuberContainer.textContent = '';
+      window.removeEventListener('resize', sizeVideo);
+    });
+  }
+
+  // youtube
+  {
+    const API_KEY = 'AIzaSyAiox8El-TwxRJ1gmrGVklUij-2v9xdMlo';
+    const CLIENT_ID = '1013588345540-j6qbve8qk8nglh715lfavkrir8hja122.apps.googleusercontent.com';
+    const CLIENT_SECRET = 'Mt2rUQkK9sGgY5Fgw_Vsrhei';
   }
 });
