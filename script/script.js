@@ -14,107 +14,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const changeLanguage = (btn, lang) => {
       const Langs = {
-        langRu: [
-          'ё',
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          0,
-          '-',
-          '=',
-          '⬅',
-          'й',
-          'ц',
-          'у',
-          'к',
-          'е',
-          'н',
-          'г',
-          'ш',
-          'щ',
-          'з',
-          'х',
-          'ъ',
-          'ф',
-          'ы',
-          'в',
-          'а',
-          'п',
-          'р',
-          'о',
-          'л',
-          'д',
-          'ж',
-          'э',
-          'я',
-          'ч',
-          'с',
-          'м',
-          'и',
-          'т',
-          'ь',
-          'б',
-          'ю',
-          '.',
-          'en',
-          ' '
+        langRu: ['ё', 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, '-', '=', '⬅', 'й', 'ц',
+          'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', 'ф', 'ы', 'в', 'а',
+          'п', 'р', 'о', 'л', 'д', 'ж', 'э', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь',
+          'б', 'ю', '.', 'en', ' '
         ],
-        langEn: [
-          '`',
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          0,
-          '-',
-          '=',
-          '⬅',
-          'q',
-          'w',
-          'e',
-          'r',
-          't',
-          'y',
-          'u',
-          'i',
-          'o',
-          'p',
-          '[',
-          ']',
-          'a',
-          's',
-          'd',
-          'f',
-          'g',
-          'h',
-          'j',
-          'k',
-          'l',
-          ';',
-          '"',
-          'z',
-          'x',
-          'c',
-          'v',
-          'b',
-          'n',
-          'm',
-          ',',
-          '.',
-          '/',
-          'ru',
-          ' '
+        langEn: ['`', 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, '-', '=', '⬅', 'q', 'w',
+          'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', 'a', 's', 'd', 'f',
+          'g', 'h', 'j', 'k', 'l', ';', '"', 'z', 'x', 'c', 'v', 'b', 'n', 'm',
+          ',', '.', '/', 'ru', ' '
         ]
       };
 
@@ -132,7 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const typing = event => {
       const { target } = event;
       if (target.tagName === 'BUTTON') {
-        const buttons = [...keyboard.querySelectorAll('button')].filter(b => b.style.visibility !== 'hidden');
+        const buttons = [...keyboard.querySelectorAll('button')]
+          .filter(b => b.style.visibility !== 'hidden');
         const contentButton = target.textContent.trim();
         if (target.id === 'keyboard-backspace') {
           searchInput.value = searchInput.value.slice(0, length - 1);
@@ -283,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gloTube = document.querySelector('.logo-academy');
     const trends = document.getElementById('yt_trend');
     const like = document.getElementById('yt_like');
+    const main = document.getElementById('yt_main');
 
     const request = options =>
       gapi.client.youtube[options.method]
@@ -309,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
               resourceId: { videoId: likedVideoId } = {}
             }
           } = item;
-
+          console.log(videoId);
           ytWrapper.innerHTML += `
             <div class="yt" data-youtuber="${likedVideoId || videoId || id}">
               <div class="yt-thumbnail" style="--aspect-ratio:16/9;">
@@ -351,6 +261,16 @@ document.addEventListener('DOMContentLoaded', () => {
         part: 'snippet',
         playlistId: 'LLb9Y6ExpE4ptu5mJBvmLoJA',
         maxResults: 6
+      });
+    });
+
+    main.addEventListener('click', () => {
+      request({
+        method: 'videos',
+        part: 'snippet',
+        myRating: 'dislike',
+        order: 'date',
+        maxResults: 6,
       });
     });
   }
