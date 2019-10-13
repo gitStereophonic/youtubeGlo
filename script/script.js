@@ -1,5 +1,7 @@
 'use strict';
 
+import { Langs } from './languages.js';
+
 document.addEventListener('DOMContentLoaded', () => {
   // экранная клавиатура
   {
@@ -13,19 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const changeLanguage = (btn, lang) => {
-      const Langs = {
-        langRu: ['ё', 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, '-', '=', '⬅', 'й', 'ц',
-          'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ъ', 'ф', 'ы', 'в', 'а',
-          'п', 'р', 'о', 'л', 'д', 'ж', 'э', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь',
-          'б', 'ю', '.', 'en', ' '
-        ],
-        langEn: ['`', 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, '-', '=', '⬅', 'q', 'w',
-          'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', 'a', 's', 'd', 'f',
-          'g', 'h', 'j', 'k', 'l', ';', '"', 'z', 'x', 'c', 'v', 'b', 'n', 'm',
-          ',', '.', '/', 'ru', ' '
-        ]
-      };
-
       if (lang === 'en') {
         btn.forEach((elem, i) => {
           elem.textContent = Langs.langEn[i];
@@ -40,8 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const typing = event => {
       const { target } = event;
       if (target.tagName === 'BUTTON') {
-        const buttons = [...keyboard.querySelectorAll('button')]
-          .filter(b => b.style.visibility !== 'hidden');
+        const buttons = [...keyboard.querySelectorAll('button')].filter(b => b.style.visibility !== 'hidden');
         const contentButton = target.textContent.trim();
         if (target.id === 'keyboard-backspace') {
           searchInput.value = searchInput.value.slice(0, length - 1);
@@ -183,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       buttonAuth.addEventListener('click', () => {
         authenticate().then(loadClient);
+        console.log('подождал');
       });
     }
   }
@@ -270,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
         part: 'snippet',
         myRating: 'dislike',
         order: 'date',
-        maxResults: 6,
+        maxResults: 6
       });
     });
   }
