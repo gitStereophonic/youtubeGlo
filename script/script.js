@@ -171,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       buttonAuth.addEventListener('click', () => {
         authenticate().then(loadClient);
-        console.log('подождал');
       });
     }
   }
@@ -182,14 +181,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const trends = document.getElementById('yt_trend');
     const like = document.getElementById('yt_like');
     const main = document.getElementById('yt_main');
+    const subscriptions = document.getElementById('yt_subscriptions');
 
     const request = options =>
       gapi.client.youtube[options.method]
         .list(options)
-        .then(responce => responce.result.items)
-        .then(render)
-        .then(youtuber)
+        .then(response => response.result.items)
+        .then(data => (options.method === 'subscriptions' ? renderSub(data) : render(data)))
         .catch(err => console.error('Во время запроса произошла ошибка: ' + err));
+
+    const renderSub = data => {
+      console.log('azazaaza');
+      const ytWrapper = document.getElementById('yt-wrapper');
+      ytWrapper.textContent = '';
+      data.forEach(item => {
+        try {
+          const {
+            snippet: {
+              resourceId: { channelId },
+              description,
+              title,
+              thumbnails: {
+                high: { url }
+              }
+            }
+          } = item;
+
+          ytWrapper.innerHTML += `
+            <div class="yt" data-youtuber="${channelId}">
+              <div class="yt-thumbnail" style="--aspect-ratio:16/9;">
+                <img src="${url}" alt="thumbnail" class="yt-thumbnail__img">
+              </div>
+              <div class="yt-title">${title}</div>
+              <div class="yt-channel">${description}</div>
+            </div>
+          `;
+        } catch (e) {
+          console.error(e);
+        }
+      });
+
+      ytWrapper.querySelectorAll('.yt').forEach(item => {
+        item.addEventListener('click', () => {
+          request({
+            method: 'search',
+            part: 'snippet',
+            channelId: item.dataset.youtuber,
+            order: 'date',
+            maxResults: 6
+          });
+        });
+      });
+    };
 
     const render = data => {
       const ytWrapper = document.getElementById('yt-wrapper');
@@ -208,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
               resourceId: { videoId: likedVideoId } = {}
             }
           } = item;
-          console.log(videoId);
+
           ytWrapper.innerHTML += `
             <div class="yt" data-youtuber="${likedVideoId || videoId || id}">
               <div class="yt-thumbnail" style="--aspect-ratio:16/9;">
@@ -222,6 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
           console.error(e);
         }
       });
+      youtuber();
     };
 
     gloTube.addEventListener('click', () => {
@@ -259,6 +303,15 @@ document.addEventListener('DOMContentLoaded', () => {
         part: 'snippet',
         myRating: 'dislike',
         order: 'date',
+        maxResults: 6
+      });
+    });
+
+    subscriptions.addEventListener('click', () => {
+      request({
+        method: 'subscriptions',
+        part: 'snippet',
+        mine: true,
         maxResults: 6
       });
     });
