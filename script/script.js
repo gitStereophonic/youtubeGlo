@@ -182,6 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const like = document.getElementById('yt_like');
     const main = document.getElementById('yt_main');
     const subscriptions = document.getElementById('yt_subscriptions');
+    const searchForm = document.querySelector('.search-form');
 
     const request = options =>
       gapi.client.youtube[options.method]
@@ -314,6 +315,28 @@ document.addEventListener('DOMContentLoaded', () => {
         mine: true,
         maxResults: 6
       });
+    });
+
+    searchForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const searchInput = searchForm.elements[0].value;
+
+      if (!searchInput) {
+        searchForm.style.border = '1px solid red';
+        return;
+      } else {
+        searchForm.style.border = '1px solid #ccc';
+      }
+
+      request({
+        method: 'search',
+        part: 'snippet',
+        order: 'relevance',
+        maxResults: 6,
+        q: searchInput
+      });
+
+      searchForm.elements[0].value = '';
     });
   }
 });
